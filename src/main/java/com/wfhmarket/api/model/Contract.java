@@ -15,7 +15,7 @@ public class Contract {
     private Long contract_id;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
-    @JoinColumn(name = "freelancer_id")
+    @JoinColumn(name = "project_id")
     private Project project_id;
 
     @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)

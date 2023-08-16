@@ -18,6 +18,10 @@ public class Project {
     @JoinColumn(name = "client_id")
     private Member client_id;
 
+    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "category_id")
+    private Category category_id;
+
     private String title;
 
     private String description;
@@ -33,9 +37,10 @@ public class Project {
     private String updated_at;
 
     @Builder
-    public Project(Long project_id, Member client_id, String title, String description, String budget, String deadline, String status, String created_at, String updated_at) {
+    public Project(Long project_id, Member client_id, Category category_id, String title, String description, String budget, String deadline, String status, String created_at, String updated_at) {
         this.project_id = project_id;
         this.client_id = client_id;
+        this.category_id = category_id;
         this.title = title;
         this.description = description;
         this.budget = budget;
