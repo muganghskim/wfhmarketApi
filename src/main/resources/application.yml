@@ -1,0 +1,25 @@
+
+server:
+  port: 8094
+
+spring:
+  application:
+    name: wfhmarket
+  datasource:
+    url: jdbc:postgresql://localhost:5432/wfhdb
+    username: test
+    password: test
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    show_sql: true
+    properties:
+      hibernate:
+        hbm2ddl:
+          auto: update
+        format_sql: true
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: DEBUG
