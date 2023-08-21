@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -73,21 +72,23 @@ public class JwtProvider {
     }
 
     public Mono<String> updateAccessToken(String refreshToken) {
-        try {
-            // 리프레시 토큰 확인
-            Jws<Claims> claims = Jwts.parser().setSigningKey(jwtConfiguration.getSecret()).parseClaimsJws(refreshToken);
+        return Mono.defer(() -> {
+            try {
+                // 리프레시 토큰 확인
+                Jws<Claims> claims = Jwts.parser().setSigningKey(jwtConfiguration.getSecret()).parseClaimsJws(refreshToken);
 
-            // 해당 사용자에 대한 새로운 액세스 토큰 생성
-            String userEmail = claims.getBody().getSubject();
-            return userDetailsService.findByUsername(userEmail)
-                    .flatMap(userDetails -> {
-                        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                        String newAccessToken = generateToken(authentication);
-                        return Mono.just(newAccessToken);
-                    });
-        } catch (Exception e) {
-            return Mono.error(e);
-        }
+                // 해당 사용자에 대한 새로운 액세스 토큰 생성
+                String userEmail = claims.getBody().getSubject();
+                return userDetailsService.findByUsername(userEmail)
+                        .flatMap(userDetails -> {
+                            Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                            String newAccessToken = generateToken(authentication);
+                            return Mono.just(newAccessToken);
+                        });
+            } catch (Exception e) {
+                return Mono.error(e);
+            }
+        });
     }
 
 

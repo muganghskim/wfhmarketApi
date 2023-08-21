@@ -4,16 +4,23 @@ import com.wfhmarket.api.util.JwtAuthenticationEntryPoint;
 import com.wfhmarket.api.util.JwtAuthorizationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.security.authentication.ReactiveAuthenticationManager;
+import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.authentication.logout.ServerLogoutSuccessHandler;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.cors.reactive.CorsWebFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import reactor.core.publisher.Mono;
 
 @Configuration
 @EnableWebFluxSecurity
@@ -30,6 +37,14 @@ public class SecurityConfig {
     }
 
     @Bean
+    public ReactiveAuthenticationManager reactiveAuthenticationManager(ReactiveUserDetailsService userDetailsService, PasswordEncoder passwordEncoder) {
+        UserDetailsRepositoryReactiveAuthenticationManager authenticationManager =
+                new UserDetailsRepositoryReactiveAuthenticationManager(userDetailsService);
+        authenticationManager.setPasswordEncoder(passwordEncoder);
+        return authenticationManager;
+    }
+
+    @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http
                 .cors().configurationSource(corsConfigurationSource()).and()
@@ -43,7 +58,23 @@ public class SecurityConfig {
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .and()
                 .addFilterAt(jwtAuthorizationFilter(), SecurityWebFiltersOrder.AUTHENTICATION)
+                .logout()
+                // 원하는 로그아웃 경로 설정
+                .logoutUrl("/logout")
+                // 로그아웃 성공 핸들러 처리
+                .logoutSuccessHandler(logoutSuccessHandler())
+                .and()
                 .build();
+    }
+
+    @Bean
+    public ServerLogoutSuccessHandler logoutSuccessHandler() {
+        return (exchange, authentication) -> {
+            return Mono.fromRunnable(() -> {
+                ServerHttpResponse resp = exchange.getExchange().getResponse();
+                resp.setStatusCode(HttpStatus.OK);
+            });
+        };
     }
 
     @Bean
