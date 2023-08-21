@@ -3,23 +3,35 @@ server:
   port: 8094
 
 spring:
-  application:
-    name: wfhmarket
-  datasource:
-    url: jdbc:postgresql://localhost:5432/wfhdb
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/wfhdb
     username: test
     password: test
-    driver-class-name: org.postgresql.Driver
-  jpa:
-    show_sql: true
     properties:
-      hibernate:
-        hbm2ddl:
-          auto: update
-        format_sql: true
+      schema: public
+  application:
+    name: wfhmarket
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/wfhdb
+#    username: test
+#    password: test
+#    driver-class-name: org.postgresql.Driver
+#  jpa:
+#    show_sql: true
+#    properties:
+#      hibernate:
+#        hbm2ddl:
+#          auto: update
+#        format_sql: true
 
 logging:
   level:
     org:
       hibernate:
         SQL: DEBUG
+
+jwt:
+  secret: YuwAmhjpWRpr77HP1dOq0jECdZbbjzgvq5K2kTBju49kLRs7s56dVZ/MeoJW97gbuewZwuEe1W/5gbIqQaBYzw==
+  tokenValidity: 3600000
+  ref: Lqs9ei2oAAK2NUB2sG8Rdxnmr3enYBaaXvoisQtbwb4cstworM5DHZf1jvIPXu7h1aT8dFh7Ac1bVVh+hNzzrA==
+  reftokenValidity: 15778476
